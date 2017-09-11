@@ -10,6 +10,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "scripts": {
+    "start": "node ligaserver.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gwelt/liga.git"
