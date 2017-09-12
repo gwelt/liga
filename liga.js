@@ -114,7 +114,8 @@ Liga.prototype.print_liga_table = function () {
 		position++;
 		var t=this.teams[position-1];
 		if ( (position==1) || (this.liga_order(t,this.teams[position-2])!=0) ) {out+=z2h(position)} else {out+='  '};
-		out+=' '+z10t(t.TeamName)+' '+z2h(t.won+t.draw+t.lost)+' '+z2h(t.goals_shot)+':'+z2t(t.goals_got)+' '+z3h(t.goals_shot-t.goals_got)+' '+z2h(t.won*3+t.draw)+'\n';
+		var goals=t.goals_shot-t.goals_got; if (goals>0) {goals='+'+goals}
+		out+=' '+z10t(t.TeamName)+' '+z2h(t.won+t.draw+t.lost)+' '+z2h(t.goals_shot)+':'+z2t(t.goals_got)+' '+z3h(goals)+' '+z2h(t.won*3+t.draw)+'\n';
 	}
 	return out;
 }
