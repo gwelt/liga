@@ -27,3 +27,50 @@ http://localhost:3004 to call the HTTP-interface.
 http://localhost:3004/bl1/tabelle to get the pre-formatted standings.  
 http://localhost:3004/bl1/spiele to get the pre-formatted list of matches for the active matchday and the following one.  
 http://localhost:3004/bl1/update to update the server-cache.  
+
+## Examples
+http://localhost:3004/bl1/tabelle
+```
+ 1 Dortmund    3  5:0   +5  7
+ 2 Hoffenheim  3  5:2   +3  7
+ 3 Hannover    3  3:1   +2  7
+ 4 RB Leipzig  3  6:3   +3  6
+ 5 Schalke     3  5:2   +3  6
+ 6 Bayern      3  5:3   +2  6
+ 7 Hamburg     3  4:3   +1  6
+ 8 Augsburg    3  5:3   +2  4
+ 9 Hertha BSC  3  3:3    0  4
+   M'gladbach  3  3:3    0  4
+11 Frankfurt   3  1:1    0  4
+12 Wolfsburg   3  2:4   -2  4
+13 Mainz 05    3  3:3    0  3
+14 Stuttgart   3  2:5   -3  3
+15 Freiburg    3  1:4   -3  2
+16 Werder      3  1:4   -3  1
+17 Leverkusen  3  4:8   -4  1
+18 Koeln       3  1:7   -6  0
+```
+http://localhost:3004/bl1/spiele
+```
+3. Spieltag
+Hamburg    RB Leipzig 0:2
+Freiburg   Dortmund   0:0
+M'gladbach Frankfurt  0:1
+Augsburg   Koeln      3:0
+Mainz 05   Leverkusen 3:1
+Wolfsburg  Hannover   1:1
+Hoffenheim Bayern     2:0
+Hertha BSC Werder     1:1
+Schalke    Stuttgart  3:1
+
+4. Spieltag
+Hannover   Hamburg    FR 20:30
+Bayern     Mainz 05   SA 15:30
+Werder     Schalke    SA 15:30
+Frankfurt  Augsburg   SA 15:30
+Stuttgart  Wolfsburg  SA 15:30
+RB Leipzig M'gladbach SA 18:30
+Hoffenheim Hertha BSC SO 13:30
+Leverkusen Freiburg   SO 15:30
+Dortmund   Koeln      SO 18:00
+```
