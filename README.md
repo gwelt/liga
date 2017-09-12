@@ -24,5 +24,5 @@ npm start
 ```
 http://localhost:3004 to call the HTTP-interface.  
 http://localhost:3004/bl1/tabelle to get the pre-formatted standings.  
-http://localhost:3004/bl1/spiele to get the pre-formatted list of matches for the active matchday and the following one.
-http://localhost:3004/bl1/update to update the server-cache.
+http://localhost:3004/bl1/spiele to get the pre-formatted list of matches for the active matchday and the following one.  
+http://localhost:3004/bl1/update to update the server-cache.  
