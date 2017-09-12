@@ -1,6 +1,6 @@
-var Liga = function (teamlist,matchdatapath) {
-	this.teamlist=teamlist;
+var Liga = function (matchdatapath,teamlist) {
 	this.matchdatapath=matchdatapath;
+	this.teamlist=teamlist||[];
 }
 module.exports = Liga;
 
@@ -41,12 +41,21 @@ Liga.prototype.load = function(callback) {
 		r.on('data', function(d) {res+=d}); 
 		r.on('end', function() { 
 
-			JSON.parse(res).forEach((m)=>{
+			try {var json=JSON.parse(res)} catch(e) {json=[]; console.log('\nCould not parse data. Expected json-format. http://openligadb.de/'+liga.matchdatapath+'\n'+e)};
+			json.forEach((m)=>{
 
 				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && m.Team1.TeamId>=0 && m.Team2.TeamId>=0) {
 					if (m.MatchResults.length>0) {
 						var team1=liga.get_team_by_searchstring(m.Team1.TeamId);
+						if (team1==undefined) {
+							team1=new Team(m.Team1.TeamId,m.Team1.TeamName,m.Team1.ShortName);
+							liga.teams.push(team1);
+						}
 						var team2=liga.get_team_by_searchstring(m.Team2.TeamId);
+						if (team2==undefined) {
+							team2=new Team(m.Team2.TeamId,m.Team2.TeamName,m.Team2.ShortName);
+							liga.teams.push(team2);
+						}
 						team1.goals_shot+=m.MatchResults[1].PointsTeam1;
 						team1.goals_got+=m.MatchResults[1].PointsTeam2;
 						team2.goals_shot+=m.MatchResults[1].PointsTeam2;
@@ -102,7 +111,7 @@ Liga.prototype.liga_order = function(a,b) {
 	if ( a_score < b_score ) {return 1} else if ( a_score > b_score ) {return -1}
 	// 2. goals sum
 	var a_goals=a.goals_shot-a.goals_got, b_goals=b.goals_shot-b.goals_got;
-	if ( a_goals < b_goals ) {return 1} else    if ( a_goals > b_goals ) {return -1}
+	if ( a_goals < b_goals ) {return 1} else if ( a_goals > b_goals ) {return -1}
 	// 3. goals more
 	if ( a.goals_shot < b.goals_shot ) {return 1} else if ( a.goals_shot > b.goals_shot ) {return -1}
 	return 0;
@@ -121,24 +130,27 @@ Liga.prototype.print_liga_table = function () {
 }
 
 Liga.prototype.print_matches = function (MatchDayId) {
+	var res='';
 	if (!MatchDayId) {MatchDayId=this.active_matchday};
 	var matchday=this.get_matchday_by_searchstring(MatchDayId);
-	var res=matchday.MatchDayId+'. Spieltag\n';
-	matchday.matches
-	.sort((a,b)=>{if (a.MatchDateTime>b.MatchDateTime){return 1} else if (a.MatchDateTime<b.MatchDateTime){return -1} else {return 0}})
-	.forEach((m)=>{
-		res+=z10t(this.get_team_by_searchstring(m.Team1).TeamName)+' '+z10t(this.get_team_by_searchstring(m.Team2).TeamName)+' ';
-		if (m.MatchIsFinished) {res+=m.GoalsTeam1+':'+m.GoalsTeam2} 
-		else {
-			var d=new Date(m.MatchDateTime+'+02:00');
-			res+=['SO','MO','DI','MI','DO','FR','SA'][d.getDay()]+' '+m.MatchDateTime.substring(11,16)
-		}
-		res+='\n';		
-	})
+	if (matchday) {
+		res=matchday.MatchDayId+'. Spieltag\n';
+		matchday.matches
+		.sort((a,b)=>{if (a.MatchDateTime>b.MatchDateTime){return 1} else if (a.MatchDateTime<b.MatchDateTime){return -1} else {return 0}})
+		.forEach((m)=>{
+			res+=z10t(this.get_team_by_searchstring(m.Team1).TeamName)+' '+z10t(this.get_team_by_searchstring(m.Team2).TeamName)+' ';
+			if (m.MatchIsFinished) {res+=m.GoalsTeam1+':'+m.GoalsTeam2} 
+			else {
+				var d=new Date(m.MatchDateTime+'+02:00');
+				res+=['SO','MO','DI','MI','DO','FR','SA'][d.getDay()]+' '+m.MatchDateTime.substring(11,16)
+			}
+			res+='\n';		
+		})
+	}
 	return res;
 }
 
 function z2h(string) {return string.toString().length>=2?string:' '+string}
 function z3h(string) {while (string.toString().length<3) {string=' '+string}; return string}
 function z2t(string) {return string.toString().length>=2?string:string+' '}
-function z10t(string) {while (string.toString().length<10) {string+=' '}; return string}
+function z10t(string) {while (string.toString().length<10) {string+=' '}; return string.substring(0,10)}
