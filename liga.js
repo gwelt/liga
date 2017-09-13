@@ -124,7 +124,7 @@ Liga.prototype.print_liga_table = function () {
 		var t=this.teams[position-1];
 		if ( (position==1) || (this.liga_order(t,this.teams[position-2])!=0) ) {out+=z2h(position)} else {out+='  '};
 		var goals=t.goals_shot-t.goals_got; if (goals>0) {goals='+'+goals}
-		out+=' '+z10t(t.TeamName)+' '+z2h(t.won+t.draw+t.lost)+' '+z2h(t.goals_shot)+':'+z2t(t.goals_got)+' '+z3h(goals)+' '+z2h(t.won*3+t.draw)+'\n';
+		out+=' '+z10t(t.TeamName.replace(/[äüöÄÜÖß]/g,function(m){return {ä:"ae",ü:"ue",ö:"oe",Ä:"Ae",Ü:"Ue",Ö:"Oe",ß:"ss"}[m]}))+' '+z2h(t.won+t.draw+t.lost)+' '+z2h(t.goals_shot)+':'+z2t(t.goals_got)+' '+z3h(goals)+' '+z2h(t.won*3+t.draw)+'\n';
 	}
 	return out;
 }
@@ -138,7 +138,7 @@ Liga.prototype.print_matches = function (MatchDayId) {
 		matchday.matches
 		.sort((a,b)=>{if (a.MatchDateTime>b.MatchDateTime){return 1} else if (a.MatchDateTime<b.MatchDateTime){return -1} else {return 0}})
 		.forEach((m)=>{
-			res+=z10t(this.get_team_by_searchstring(m.Team1).TeamName)+' '+z10t(this.get_team_by_searchstring(m.Team2).TeamName)+' ';
+			res+=z10t(this.get_team_by_searchstring(m.Team1).TeamName.replace(/[äüöÄÜÖß]/g,function(m){return {ä:"ae",ü:"ue",ö:"oe",Ä:"Ae",Ü:"Ue",Ö:"Oe",ß:"ss"}[m]}))+' '+z10t(this.get_team_by_searchstring(m.Team2).TeamName.replace(/[äüöÄÜÖß]/g,function(m){return {ä:"ae",ü:"ue",ö:"oe",Ä:"Ae",Ü:"Ue",Ö:"Oe",ß:"ss"}[m]}))+' ';
 			if (m.MatchIsFinished) {res+=m.GoalsTeam1+':'+m.GoalsTeam2} 
 			else {
 				var d=new Date(m.MatchDateTime+'+02:00');
