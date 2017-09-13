@@ -1,6 +1,13 @@
-var Liga = function (matchdatapath,teamlist) {
+var Liga = function (id,matchdatapath,teamlist) {
+	this.id=id;
+	this.leaguename=false;
 	this.matchdatapath=matchdatapath;
+	this.teams=[];
 	this.teamlist=teamlist||[];
+	this.matchdays=[];
+	this.active_matchday=false;
+	this.last_update=false;
+	this.last_check=false;
 }
 module.exports = Liga;
 
@@ -29,19 +36,34 @@ function Match(MatchDateTime,Team1,Team2,MatchIsFinished,GoalsTeam1,GoalsTeam2) 
 	this.GoalsTeam2=GoalsTeam2;
 }
 
+Liga.prototype.check = function(callback) {
+	var liga=this;
+	require('https').get({host:'www.openligadb.de', path:'/api/getlastchangedate'+liga.matchdatapath+'/'+liga.active_matchday}, function(r) {
+		var res=""; 
+		r.on('data', function(d) {res+=d}); 
+		r.on('end', function() {
+			liga.last_check=new Date().toISOString();
+			var last_change=res.slice(1,-1);
+			var diff=new Date(last_change)-new Date(liga.last_update);
+			callback(diff);
+		})
+	})
+}
+
 Liga.prototype.load = function(callback) {
 	var liga=this;
 	liga.teams=[];
 	liga.teamlist.forEach((t)=>{liga.teams.push(new Team(t.TeamId,t.TeamName,t.ShortName))});
 	liga.matchdays=[];
+	liga.leaguename=false;
 	liga.active_matchday=false;
 	liga.last_update=false;
-	require('https').get({host:'www.openligadb.de', path:liga.matchdatapath}, function(r) {
+	require('https').get({host:'www.openligadb.de', path:'/api/getmatchdata'+liga.matchdatapath}, function(r) {
 		var res=""; 
 		r.on('data', function(d) {res+=d}); 
 		r.on('end', function() { 
 
-			try {var json=JSON.parse(res)} catch(e) {json=[]; console.log('\nCould not parse data. Expected json-format. http://openligadb.de/'+liga.matchdatapath+'\n'+e)};
+			try {var json=JSON.parse(res)} catch(e) {json=[]; console.log('\nCould not parse data. Expected json-format. http://openligadb.de/api/getmatchdata'+liga.matchdatapath+'\n'+e)};
 			json.forEach((m)=>{
 
 				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && m.Team1.TeamId>=0 && m.Team2.TeamId>=0) {
@@ -68,6 +90,7 @@ Liga.prototype.load = function(callback) {
 				}
 
 				if (!liga.last_update||liga.last_update<m.LastUpdateDateTime) {liga.last_update=m.LastUpdateDateTime}
+				if (!liga.leaguename) {liga.leaguename=m.LeagueName}
 				
 				var matchday=liga.get_matchday_by_searchstring(m.Group.GroupOrderID);
 				if (matchday==undefined) {
@@ -118,7 +141,7 @@ Liga.prototype.liga_order = function(a,b) {
 }
 
 Liga.prototype.print_liga_table = function () {
-	var out='', position=0, last_update=false;
+	var out='', position=0;
 	while (position<this.teams.length) {
 		position++;
 		var t=this.teams[position-1];
@@ -126,7 +149,7 @@ Liga.prototype.print_liga_table = function () {
 		var goals=t.goals_shot-t.goals_got; if (goals>0) {goals='+'+goals}
 		out+=' '+z10t(t.TeamName.replace(/[äüöÄÜÖß]/g,function(m){return {ä:"ae",ü:"ue",ö:"oe",Ä:"Ae",Ü:"Ue",Ö:"Oe",ß:"ss"}[m]}))+' '+z2h(t.won+t.draw+t.lost)+' '+z2h(t.goals_shot)+':'+z2t(t.goals_got)+' '+z3h(goals)+' '+z2h(t.won*3+t.draw)+'\n';
 	}
-	return out;
+	return out.toUpperCase();
 }
 
 Liga.prototype.print_matches = function (MatchDayId) {
@@ -147,7 +170,7 @@ Liga.prototype.print_matches = function (MatchDayId) {
 			res+='\n';		
 		})
 	}
-	return res;
+	return res.toUpperCase();
 }
 
 function z2h(string) {return string.toString().length>=2?string:' '+string}

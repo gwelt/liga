@@ -1,29 +1,66 @@
 'use strict';
 const Liga = require('./liga.js');
+const config = require('./config.json');
+var ligalist=[];
+config.ligalist.forEach((liga)=>{
+	ligalist.push(new Liga(liga.id,liga.apipath,liga.teams))
+});
 const express = require('express');
-const path = require('path');
-const PORT = process.env.PORT || 3004;
+const PORT = process.env.PORT || config.port;
 const server = express()
-	.use((req, res) => {
+	.get('/:id?/:call?', (req,res)=>{
 		res.setHeader('Access-Control-Allow-Origin','*');
-		if (req.url=="/") {res.send('<a href=/bl1/tabelle>Tabelle</a> <a href=/bl1/spiele>Spiele</a><br><a href=/bl1/update>update</a> Stand: '+bundesliga.last_update)}
-		if (req.url=="/bl1") {res.send(bundesliga.print_liga_table()+'\n'+bundesliga.print_matches()+'\n'+bundesliga.print_matches(bundesliga.active_matchday+1)+'\n'+bundesliga.last_update)}
-		if (req.url=="/bl1/tabelle") {res.send(bundesliga.print_liga_table())}
-		if (req.url=="/bl1/spiele") {res.send(bundesliga.print_matches()+'\n'+bundesliga.print_matches(bundesliga.active_matchday+1))}
-		if (req.url=="/bl1/json") {res.send(JSON.stringify(bundesliga))}
-		if (req.url=="/bl1/update") {bundesliga.load(()=>{res.send(bundesliga.last_update)})}
-		if (req.url=="/bl2") {res.send(zweite_bundesliga.print_liga_table()+'\n'+zweite_bundesliga.print_matches()+'\n'+zweite_bundesliga.print_matches(zweite_bundesliga.active_matchday+1)+'\n'+zweite_bundesliga.last_update)}
-		if (req.url=="/bl2/tabelle") {res.send(zweite_bundesliga.print_liga_table())}
-		if (req.url=="/bl2/spiele") {res.send(zweite_bundesliga.print_matches()+'\n'+zweite_bundesliga.print_matches(zweite_bundesliga.active_matchday+1))}
-		if (req.url=="/bl2/json") {res.send(JSON.stringify(zweite_bundesliga))}
-		if (req.url=="/bl2/update") {zweite_bundesliga.load(()=>{res.send(zweite_bundesliga.last_update)})}
+		if (req.params.id) {
+			var liga=get_liga_by_id(req.params.id);
+			if (liga) {
+				switch (req.params.call) {
+					case undefined:
+						res.send(liga.print_liga_table()+'\n'+liga.print_matches()+'\n'+liga.print_matches(liga.active_matchday+1)+'\n'+liga.last_update);
+						break;
+					case 'tabelle':
+						res.send(liga.print_liga_table());
+						break;
+					case 'spiele':
+						res.send(liga.print_matches()+'\n'+liga.print_matches(liga.active_matchday+1));
+						break;
+					case 'json':
+						res.json(liga);
+						break;
+					case 'html':
+						res.send('<pre>'+liga.print_liga_table()+'\n'+liga.print_matches()+'\n'+liga.print_matches(liga.active_matchday+1)+'\n'+liga.last_update+'</pre>');
+						break;
+					case 'update':
+						liga.load(()=>{res.send('UPDATED. '+liga.last_update)});
+						break;
+					case 'check':
+						liga.check((needs_update)=>{
+							if (needs_update>0) {liga.load(()=>{res.send('CHECKED (='+needs_update+') AND UPDATED. '+liga.last_update)})}
+							else {res.send('CHECKED. NO UPDATE NEEDED. '+liga.last_update)}
+						});
+						break;
+					default:
+						res.sendStatus(404);
+				}
+			}
+			else {res.sendStatus(404)}
+		}
+		else {
+			var out='';
+			ligalist.forEach((liga)=>{
+				out+='<a href=/'+liga.id+'/html>'+liga.leaguename+'</a> | <a href=/'+liga.id+'/json>JSON</a> | <a href=/'+liga.id+'/check>check for update</a> ('+liga.last_update+')<br>';
+			});
+			res.send(out)
+		}
 	})
 	.listen(PORT, function() {
-		bundesliga.load(()=>{console.log('\n'+bundesliga.print_liga_table()+'\n'+bundesliga.print_matches()+'\n'+bundesliga.print_matches(bundesliga.active_matchday+1))});
-		zweite_bundesliga.load(()=>{console.log('\n'+zweite_bundesliga.print_liga_table()+'\n'+zweite_bundesliga.print_matches()+'\n'+zweite_bundesliga.print_matches(zweite_bundesliga.active_matchday+1))});
+		ligalist.forEach((liga)=>{
+			liga.load(()=>{console.log('\n'+liga.print_liga_table()+'\n'+liga.print_matches()+'\n'+liga.print_matches(liga.active_matchday+1))});
+		});
 		process.stdout.write(`\x1b[44m LIGA SERVER LISTENING ON PORT ${ PORT } \x1b[0m `);
 	});
 
-var bl1_teams = [{"TeamId":65,"TeamName":"Koeln","ShortName":"KOE"},{"TeamId":81,"TeamName":"Mainz 05","ShortName":"M05"},{"TeamId":6,"TeamName":"Leverkusen","ShortName":"B04"},{"TeamId":40,"TeamName":"Bayern","ShortName":"FCB"},{"TeamId":7,"TeamName":"Dortmund","ShortName":"BVB"},{"TeamId":87,"TeamName":"M'gladbach","ShortName":"BMG"},{"TeamId":91,"TeamName":"Frankfurt","ShortName":"SGE"},{"TeamId":95,"TeamName":"Augsburg","ShortName":"FCA"},{"TeamId":9,"TeamName":"Schalke","ShortName":"S04"},{"TeamId":100,"TeamName":"Hamburg","ShortName":"HSV"},{"TeamId":55,"TeamName":"Hannover","ShortName":"H96"},{"TeamId":54,"TeamName":"Hertha BSC","ShortName":"BSC"},{"TeamId":1635,"TeamName":"RB Leipzig","ShortName":"RBL"},{"TeamId":112,"TeamName":"Freiburg","ShortName":"SCF"},{"TeamId":123,"TeamName":"Hoffenheim","ShortName":"TSG"},{"TeamId":16,"TeamName":"Stuttgart","ShortName":"VFB"},{"TeamId":131,"TeamName":"Wolfsburg","ShortName":"WOB"},{"TeamId":134,"TeamName":"Werder","ShortName":"SVW"}];
-var bundesliga=new Liga('/api/getmatchdata/bl1/2017',bl1_teams);
-var zweite_bundesliga=new Liga('/api/getmatchdata/bl2/2017');
+function get_liga_by_id(id) {
+	var res;
+	ligalist.forEach((l)=>{if (l.id==id) {res=l}});
+	return res;
+}
