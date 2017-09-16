@@ -36,16 +36,15 @@ function Match(MatchDateTime,Team1,Team2,MatchIsFinished,GoalsTeam1,GoalsTeam2) 
 	this.GoalsTeam2=GoalsTeam2;
 }
 
-Liga.prototype.check = function(callback) {
+Liga.prototype.check = function(matchday,callback) {
 	var liga=this;
-	require('https').get({host:'www.openligadb.de', path:'/api/getlastchangedate'+liga.matchdatapath+'/'+liga.active_matchday}, function(r) {
+	require('https').get({host:'www.openligadb.de', path:'/api/getlastchangedate'+liga.matchdatapath+'/'+matchday}, function(r) {
 		var res=""; 
 		r.on('data', function(d) {res+=d}); 
 		r.on('end', function() {
 			liga.last_check=new Date().toISOString();
 			var last_change=res.slice(1,-1);
-			var diff=new Date(last_change)-new Date(liga.last_update);
-			callback(diff);
+			callback(new Date(last_change) > new Date(liga.last_update));
 		})
 	})
 }
@@ -66,7 +65,7 @@ Liga.prototype.load = function(callback) {
 			try {var json=JSON.parse(res)} catch(e) {json=[]; console.log('\nCould not parse data. Expected json-format. http://openligadb.de/api/getmatchdata'+liga.matchdatapath+'\n'+e)};
 			json.forEach((m)=>{
 
-				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && m.Team1.TeamId>=0 && m.Team2.TeamId>=0) {
+				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && (m.MatchResults[1]) && m.Team1.TeamId>=0 && m.Team2.TeamId>=0) {
 					if (m.MatchResults.length>0) {
 						var team1=liga.get_team_by_searchstring(m.Team1.TeamId);
 						if (team1==undefined) {
@@ -97,10 +96,10 @@ Liga.prototype.load = function(callback) {
 					matchday=new MatchDay(m.Group.GroupOrderID);
 					liga.matchdays.push(matchday);
 				}
-				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults')) {
+				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && (m.MatchResults[1])) {
 					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,m.MatchIsFinished,m.MatchResults[1].PointsTeam1,m.MatchResults[1].PointsTeam2));
 				} else {
-					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,m.MatchIsFinished,undefined,undefined));
+					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,false,undefined,undefined));
 				}
 
 			});

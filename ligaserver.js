@@ -52,10 +52,19 @@ const server = express()
 						break;
 					
 					case 'check':
-						liga.check((needs_update)=>{
-							if (needs_update>0) {liga.load(()=>{res.send('CHECKED (='+needs_update+') AND UPDATED. '+liga.last_update)})}
-							else {res.send('CHECKED. NO UPDATE NEEDED. '+liga.last_update)}
-						});
+						liga.check(liga.active_matchday,(updateNeeded)=>{
+							if (updateNeeded) {
+								liga.load(()=>{res.send('CHECKED AND UPDATED. '+liga.last_update)})
+							} else {
+								liga.check(liga.active_matchday+1,(updateNeeded)=>{
+									if (updateNeeded) {
+										liga.load(()=>{res.send('CHECKED AND UPDATED. '+liga.last_update)})
+									} else {
+										res.send('CHECKED. NO UPDATE NEEDED. '+liga.last_update)
+									}
+								})
+							}
+						})
 						break;
 					case 'update':
 						liga.load(()=>{res.send('UPDATED. '+liga.last_update)});
