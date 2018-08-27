@@ -77,8 +77,8 @@ Liga.prototype.load = function(callback) {
 							team2=new Team(m.Team2.TeamId,m.Team2.TeamName,m.Team2.ShortName);
 							liga.teams.push(team2);
 						}
-						var result_at_matchend=m.MatchResults[1];
 						
+						var result_at_matchend=m.MatchResults[1];
 						m.MatchResults.forEach((ram)=>{
 							if (ram.ResultName=="Endergebnis") {result_at_matchend=ram}
 						  }
@@ -104,7 +104,12 @@ Liga.prototype.load = function(callback) {
 					liga.matchdays.push(matchday);
 				}
 				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && (m.MatchResults[1])) {
-					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,m.MatchIsFinished,m.MatchResults[1].PointsTeam1,m.MatchResults[1].PointsTeam2));
+					var result_at_matchend=m.MatchResults[1];
+					m.MatchResults.forEach((ram)=>{
+						if (ram.ResultName=="Endergebnis") {result_at_matchend=ram}
+					  }
+					)
+					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,m.MatchIsFinished,result_at_matchend.PointsTeam1,result_at_matchend.PointsTeam2));
 				} else {
 					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,false,undefined,undefined));
 				}
