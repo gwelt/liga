@@ -77,12 +77,19 @@ Liga.prototype.load = function(callback) {
 							team2=new Team(m.Team2.TeamId,m.Team2.TeamName,m.Team2.ShortName);
 							liga.teams.push(team2);
 						}
-						team1.goals_shot+=m.MatchResults[1].PointsTeam1;
-						team1.goals_got+=m.MatchResults[1].PointsTeam2;
-						team2.goals_shot+=m.MatchResults[1].PointsTeam2;
-						team2.goals_got+=m.MatchResults[1].PointsTeam1;
-						if (m.MatchResults[1].PointsTeam1>m.MatchResults[1].PointsTeam2) {team1.won++; team2.lost++}
-						else if (m.MatchResults[1].PointsTeam1<m.MatchResults[1].PointsTeam2) {team1.lost++; team2.won++}
+						var result_at_matchend=m.MatchResults[1];
+						
+						m.MatchResults.forEach((ram)=>{
+							if (ram.ResultName=="Endergebnis") {result_at_matchend=ram}
+						  }
+						)
+
+						team1.goals_shot+=result_at_matchend.PointsTeam1;
+						team1.goals_got+=result_at_matchend.PointsTeam2;
+						team2.goals_shot+=result_at_matchend.PointsTeam2;
+						team2.goals_got+=result_at_matchend.PointsTeam1;
+						if (result_at_matchend.PointsTeam1>result_at_matchend.PointsTeam2) {team1.won++; team2.lost++}
+						else if (result_at_matchend.PointsTeam1<result_at_matchend.PointsTeam2) {team1.lost++; team2.won++}
 						else {team1.draw++; team2.draw++}
 						if (!liga.active_matchday||liga.active_matchday<m.Group.GroupOrderID) {liga.active_matchday=m.Group.GroupOrderID}
 					};
