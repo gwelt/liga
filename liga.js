@@ -65,8 +65,18 @@ Liga.prototype.load = function(callback) {
 			try {var json=JSON.parse(res)} catch(e) {json=[]; console.log('\nCould not parse data. Expected json-format. http://openligadb.de/api/getmatchdata'+liga.matchdatapath+'\n'+e)};
 			json.forEach((m)=>{
 
-				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && (m.MatchResults[1]) && m.Team1.TeamId>=0 && m.Team2.TeamId>=0) {
-					if (m.MatchResults.length>0) {
+				var matchday=liga.get_matchday_by_searchstring(m.Group.GroupOrderID);
+				if (matchday==undefined) {
+					matchday=new MatchDay(m.Group.GroupOrderID);
+					liga.matchdays.push(matchday);
+				}
+
+				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && m.Team1.TeamId>=0 && m.Team2.TeamId>=0) {
+
+					var result_at_matchend={};
+					m.MatchResults.forEach((ram)=>{if (ram.ResultName=="Endergebnis") {result_at_matchend=ram}});
+
+					if (result_at_matchend.hasOwnProperty('PointsTeam1') && result_at_matchend.hasOwnProperty('PointsTeam2')) {
 						var team1=liga.get_team_by_searchstring(m.Team1.TeamId);
 						if (team1==undefined) {
 							team1=new Team(m.Team1.TeamId,m.Team1.TeamName,m.Team1.ShortName);
@@ -77,13 +87,6 @@ Liga.prototype.load = function(callback) {
 							team2=new Team(m.Team2.TeamId,m.Team2.TeamName,m.Team2.ShortName);
 							liga.teams.push(team2);
 						}
-						
-						var result_at_matchend=m.MatchResults[1];
-						m.MatchResults.forEach((ram)=>{
-							if (ram.ResultName=="Endergebnis") {result_at_matchend=ram}
-						  }
-						)
-
 						team1.goals_shot+=result_at_matchend.PointsTeam1;
 						team1.goals_got+=result_at_matchend.PointsTeam2;
 						team2.goals_shot+=result_at_matchend.PointsTeam2;
@@ -92,27 +95,17 @@ Liga.prototype.load = function(callback) {
 						else if (result_at_matchend.PointsTeam1<result_at_matchend.PointsTeam2) {team1.lost++; team2.won++}
 						else {team1.draw++; team2.draw++}
 						if (!liga.active_matchday||liga.active_matchday<m.Group.GroupOrderID) {liga.active_matchday=m.Group.GroupOrderID}
-					};
+						matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,m.MatchIsFinished,result_at_matchend.PointsTeam1,result_at_matchend.PointsTeam2));
+					} else {
+						matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,false,undefined,undefined));	
+					}					
+
+				} else {
+					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,false,undefined,undefined));
 				}
 
 				if (!liga.last_update||liga.last_update<m.LastUpdateDateTime) {liga.last_update=m.LastUpdateDateTime}
 				if (!liga.leaguename) {liga.leaguename=m.LeagueName}
-				
-				var matchday=liga.get_matchday_by_searchstring(m.Group.GroupOrderID);
-				if (matchday==undefined) {
-					matchday=new MatchDay(m.Group.GroupOrderID);
-					liga.matchdays.push(matchday);
-				}
-				if (m.MatchIsFinished && m.hasOwnProperty('MatchResults') && (m.MatchResults[1])) {
-					var result_at_matchend=m.MatchResults[1];
-					m.MatchResults.forEach((ram)=>{
-						if (ram.ResultName=="Endergebnis") {result_at_matchend=ram}
-					  }
-					)
-					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,m.MatchIsFinished,result_at_matchend.PointsTeam1,result_at_matchend.PointsTeam2));
-				} else {
-					matchday.matches.push(new Match(m.MatchDateTime,m.Team1.TeamId,m.Team2.TeamId,false,undefined,undefined));
-				}
 
 			});
 
