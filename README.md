@@ -20,17 +20,19 @@ I'll use an existing service on a Raspberry Pi that will launch a HTTP-request, 
 Install and start the server.
 ```
 git clone http://github.com/gwelt/liga
+cd liga
 npm install
 npm start
 ```
 http://localhost:3004 to call the HTTP-interface.  
+http://localhost:3004/bl1 to get the standings and a list of matches.  
 http://localhost:3004/bl1/json to get the standings and all matches data as JSON-object.  
 http://localhost:3004/bl1/print/tabelle to get the pre-formatted standings.  
 http://localhost:3004/bl1/print/spiele to get the pre-formatted list of matches for the active matchday and the following one.  
 http://localhost:3004/bl1/update to update the server-cache.  
 
-## Examples
-http://localhost:3004/bl1/print/tabelle
+## Example
+http://localhost:3004/bl1
 ```
  1 Dortmund    3  5:0   +5  7
  2 Hoffenheim  3  5:2   +3  7
@@ -50,9 +52,7 @@ http://localhost:3004/bl1/print/tabelle
 16 Werder      3  1:4   -3  1
 17 Leverkusen  3  4:8   -4  1
 18 Koeln       3  1:7   -6  0
-```
-http://localhost:3004/bl1/print/spiele
-```
+
 3. Spieltag
 Hamburg    RB Leipzig 0:2
 Freiburg   Dortmund   0:0
