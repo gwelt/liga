@@ -24,12 +24,13 @@ npm install
 npm start
 ```
 http://localhost:3004 to call the HTTP-interface.  
-http://localhost:3004/bl1/tabelle to get the pre-formatted standings.  
-http://localhost:3004/bl1/spiele to get the pre-formatted list of matches for the active matchday and the following one.  
+http://localhost:3004/bl1/json to get the standings and all matches data as JSON-object.  
+http://localhost:3004/bl1/print/tabelle to get the pre-formatted standings.  
+http://localhost:3004/bl1/print/spiele to get the pre-formatted list of matches for the active matchday and the following one.  
 http://localhost:3004/bl1/update to update the server-cache.  
 
 ## Examples
-http://localhost:3004/bl1/tabelle
+http://localhost:3004/bl1/print/tabelle
 ```
  1 Dortmund    3  5:0   +5  7
  2 Hoffenheim  3  5:2   +3  7
@@ -50,7 +51,7 @@ http://localhost:3004/bl1/tabelle
 17 Leverkusen  3  4:8   -4  1
 18 Koeln       3  1:7   -6  0
 ```
-http://localhost:3004/bl1/spiele
+http://localhost:3004/bl1/print/spiele
 ```
 3. Spieltag
 Hamburg    RB Leipzig 0:2
