@@ -4,7 +4,8 @@ This will launch a HTTP-Server with a minimal user-interface that serves the sta
 
 ## Why?
 I want to print the standings of german Fußball-Bundesliga on a thermal-printer.  
-"For the sake of it."
+This is the result:  
+![liga](ligabl2.gif)
 
 ## How?
 I'll use an existing service on a Raspberry Pi that will launch a HTTP-request, get the pre-formatted data and send it to the thermal-printer. To create my own thermal-printer-table-style, the data needs to be available in raw format first. I decided to get the matches-data from [openligadb.de](http://openligadb.de) and do the math on my own.
