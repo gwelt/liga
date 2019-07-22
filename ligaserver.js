@@ -11,7 +11,6 @@ const server = express()
 	.get('(/liga)?/:id?/:call?/:subcall?', (req,res)=>{
 		res.setHeader('Access-Control-Allow-Origin','*');
 		if (req.params.id) {
-		console.log(req.params);
 			var liga=get_liga_by_id(req.params.id);
 			if (liga) {
 				switch (req.params.call) {
@@ -80,7 +79,7 @@ const server = express()
 		else {
 			var out='';
 			ligalist.forEach((liga)=>{
-				out+='<h1><a href=/'+liga.id+'>'+liga.leaguename+'</a></h1><li><a href=/'+liga.id+'/print>/'+liga.id+'/print</a> Tabelle und Spiele formatiert für Thermo-Drucker</li><li><a href=/'+liga.id+'/print/tabelle>/'+liga.id+'/print/tabelle</a> Tabelle formatiert für Thermo-Drucker</li><li><a href=/'+liga.id+'/print/spiele>/'+liga.id+'/print/spiele</a> Spiele formatiert für Thermo-Drucker</li><li><a href=/'+liga.id+'/json>/'+liga.id+'/json</a> Tabelle und Spiele im JSON-Format</li><li><a href=/'+liga.id+'/json/tabelle>/'+liga.id+'/json/tabelle</a> Tabelle im JSON-Format</li><li><a href=/'+liga.id+'/json/spiele>/'+liga.id+'/json/spiele</a> Spiele im JSON-Format</li><li><a href=/'+liga.id+'/check>/'+liga.id+'/check</a> check for update</li><li><a href=/'+liga.id+'/update>/'+liga.id+'/update</a> force update</li><br>Last change: '+liga.last_update+'<br>';
+				out+='<html><body><h1><a href='+liga.id+'>'+liga.leaguename+'</a></h1><li><a href='+liga.id+'/print>/'+liga.id+'/print</a> Tabelle und Spiele formatiert für Thermo-Drucker</li><li><a href='+liga.id+'/print/tabelle>/'+liga.id+'/print/tabelle</a> Tabelle formatiert für Thermo-Drucker</li><li><a href='+liga.id+'/print/spiele>/'+liga.id+'/print/spiele</a> Spiele formatiert für Thermo-Drucker</li><li><a href='+liga.id+'/json>/'+liga.id+'/json</a> Tabelle und Spiele im JSON-Format</li><li><a href='+liga.id+'/json/tabelle>/'+liga.id+'/json/tabelle</a> Tabelle im JSON-Format</li><li><a href='+liga.id+'/json/spiele>/'+liga.id+'/json/spiele</a> Spiele im JSON-Format</li><li><a href='+liga.id+'/check>/'+liga.id+'/check</a> check for update</li><li><a href='+liga.id+'/update>/'+liga.id+'/update</a> force update</li><br>Last change: '+liga.last_update+'<br></body></html>';
 			});
 			res.send(out)
 		}
