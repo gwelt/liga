@@ -8,9 +8,10 @@ config.ligalist.forEach((liga)=>{
 const express = require('express');
 const PORT = process.env.PORT || config.port;
 const server = express()
-	.get('/:id?/:call?/:subcall?', (req,res)=>{
+	.get('(/liga)?/:id?/:call?/:subcall?', (req,res)=>{
 		res.setHeader('Access-Control-Allow-Origin','*');
 		if (req.params.id) {
+		console.log(req.params);
 			var liga=get_liga_by_id(req.params.id);
 			if (liga) {
 				switch (req.params.call) {
