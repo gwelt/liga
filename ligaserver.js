@@ -54,13 +54,13 @@ const server = express()
 					case 'check':
 						liga.check(liga.active_matchday,(updateNeeded)=>{
 							if (updateNeeded) {
-								liga.load(()=>{res.send('CHECKED AND UPDATED. '+liga.last_update)})
+								liga.load(()=>{res.send('CHECKED AND UPDATED. \n'+liga.last_update)})
 							} else {
 								liga.check(liga.active_matchday+1,(updateNeeded)=>{
 									if (updateNeeded) {
-										liga.load(()=>{res.send('CHECKED AND UPDATED. '+liga.last_update)})
+										liga.load(()=>{res.send('CHECKED AND UPDATED. \n'+liga.last_update)})
 									} else {
-										res.send('CHECKED. NO UPDATE NEEDED. '+liga.last_update)
+										res.send('CHECKED. NO UPDATE NEEDED. \n'+liga.last_update)
 									}
 								})
 							}
