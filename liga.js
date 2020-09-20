@@ -12,9 +12,9 @@ var Liga = function (id,matchdatapath,teamlist) {
 module.exports = Liga;
 
 function Team(TeamId,TeamName,ShortName) {
-	this.TeamId=TeamId;
-	this.TeamName=TeamName;
-	this.ShortName=ShortName;
+	this.TeamId=TeamId||-1;
+	this.TeamName=TeamName||'=UNKNOWN=';
+	this.ShortName=ShortName||'=NN=';
 	this.won=0;
 	this.draw=0;
 	this.lost=0;
@@ -117,7 +117,7 @@ Liga.prototype.load = function(callback) {
 }
 
 Liga.prototype.get_team_by_searchstring = function (s) {
-	var res;
+	var res = new Team(-1,'ID_'+s,'ID_'+s);
 	this.teams.forEach((t)=>{
 		if ((t.TeamId==s)||(t.TeamName==s)||(t.ShortName==s)) {res=t}
 	})
